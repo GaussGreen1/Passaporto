@@ -99,15 +99,11 @@ func PollAPI(w http.ResponseWriter, bot *tgbotapi.BotAPI, cookies string) {
 			LogToDatabase(bodyString)
 
 			response := ""
-			if strings.Contains(bodyString, "dataPrimaDisponibilitaResidenti\":null") {
-				response = "NO"
-				LogToWebSocket("Nessun posto libero")
-			} else if strings.Contains(bodyString, "_csrf") {
-				response = "NO"
-				LogToWebSocket("Cookies scaduti, qualcuno lo faccia ripartire pls")
-			} else {
-				result := GetCharactersAfterSubstring(bodyString, "dataPrimaDisponibilitaResidenti\":\"", 10)
-				if strings.Contains(result, "null") {
+			// Split the bodyString by "dataPrimaDisponibilitaResidenti"
+			parts := strings.SplitN(bodyString, "dataPrimaDisponibilitaResidenti", 2)
+			if len(parts) > 1 {
+				// Check only the first part
+				if strings.Contains(parts[0], "null") {
 					response = "NO"
 					LogToWebSocket("Nessun posto libero")
 				} else {
@@ -115,6 +111,11 @@ func PollAPI(w http.ResponseWriter, bot *tgbotapi.BotAPI, cookies string) {
 					fmt.Println(bodyString)
 					response = "YES"
 				}
+			} else if strings.Contains(bodyString, "_csrf") {
+				response = "NO"
+				LogToWebSocket("Cookies scaduti, qualcuno lo faccia ripartire pls")
+			} else {
+				response = "NO"
 			}
 
 			if response == "YES" {
