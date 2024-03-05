@@ -1,30 +1,39 @@
 package main
 
+import (
+	"context"
+	"fmt"
+	"log"
+	"os"
+	"time"
+
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
+)
+
 func LogToDatabase(message string) {
-	/*
-		defer func() {
-			if r := recover(); r != nil {
-				fmt.Println("Recovered from panic inside LogToDatabase:", r)
-			}
-		}()
-
-		mongoURL := os.Getenv("MONGO_URL")
-
-		client, err := mongo.Connect(context.Background(), options.Client().ApplyURI(mongoURL))
-		if err != nil {
-			log.Fatal(err)
+	defer func() {
+		if r := recover(); r != nil {
+			fmt.Println("Recovered from panic inside LogToDatabase:", r)
 		}
-		defer client.Disconnect(context.Background())
+	}()
 
-		collection := client.Database("passaporto").Collection("passaportoLogs")
+	mongoURL := os.Getenv("MONGO_URL")
 
-		_, err = collection.InsertOne(context.Background(), bson.D{
-			{"timestamp", time.Now()},
-			{"message", message},
-		})
-		if err != nil {
-			log.Fatal(err)
-		}
+	client, err := mongo.Connect(context.Background(), options.Client().ApplyURI(mongoURL))
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer client.Disconnect(context.Background())
 
-	*/
+	collection := client.Database("passaporto").Collection("passaportoLogs")
+
+	_, err = collection.InsertOne(context.Background(), bson.D{
+		{"timestamp", time.Now()},
+		{"message", message},
+	})
+	if err != nil {
+		log.Fatal(err)
+	}
 }
