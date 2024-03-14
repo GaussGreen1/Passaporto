@@ -1,6 +1,8 @@
 package main
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
 	"io"
 	"log"
@@ -96,7 +98,13 @@ func PollAPI(w http.ResponseWriter, bot *tgbotapi.BotAPI, cookies string) {
 				return
 			}
 			bodyString = string(body)
-			LogToDatabase(bodyString)
+
+			formattedBody, err := PrettyString(bodyString)
+			if err != nil {
+				log.Fatal(err)
+			}
+
+			LogToDatabase(formattedBody)
 
 			response := ""
 			//if strings.Contains(bodyString, "dataPrimaDisponibilitaResidenti\":null") {
@@ -107,7 +115,7 @@ func PollAPI(w http.ResponseWriter, bot *tgbotapi.BotAPI, cookies string) {
 				response = "NO"
 				LogToWebSocket("Cookies scaduti, qualcuno lo faccia ripartire pls")
 			} else {
-				result := GetCharactersAfterSubstring(bodyString, "dataPrimaDisponibilitaResidenti\":\"", 10)
+				result := GetCharactersAfterSubstring(bodyString, "\"ruoloId\":1,\"dataPrimaDisponibilitaResidenti\":\"", 10)
 				if strings.Contains(result, "null") {
 					response = "NO"
 					LogToWebSocket("Nessun posto libero")
@@ -139,4 +147,12 @@ func SendErrorResponse(w http.ResponseWriter, message string) {
 	// Send an error message back to the frontend
 	errorMsg = message
 	http.Error(w, message, http.StatusBadRequest)
+}
+
+func PrettyString(str string) (string, error) {
+	var prettyJSON bytes.Buffer
+	if err := json.Indent(&prettyJSON, []byte(str), "", "    "); err != nil {
+		return "", err
+	}
+	return prettyJSON.String(), nil
 }
