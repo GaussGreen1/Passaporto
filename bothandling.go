@@ -22,7 +22,7 @@ func sendTelegramNotification(bot *tgbotapi.BotAPI, bodyString string) {
 	//gruppo = -974313836
 	//supergruppo = -1001946027674
 
-	result := GetCharactersAfterSubstring(bodyString, "dataPrimaDisponibilitaResidenti\":\"", 10)
+	result := GetCharactersAfterSubstring(bodyString, "\"ruoloId\":1,\"dataPrimaDisponibilitaResidenti\":\"", 10)
 	fmt.Println("Characters after the substring:", result)
 
 	today := time.Now().In(time.FixedZone("EST", -5*3600))
